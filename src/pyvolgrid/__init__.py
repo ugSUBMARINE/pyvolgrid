@@ -39,14 +39,8 @@ def volume_from_spheres(
     """
 
     # Handle and validate coords
-    if (
-        isinstance(coords, np.ndarray)
-        and coords.dtype == np.float64
-        and coords.flags.c_contiguous
-    ):
-        coords_array = coords
-    else:
-        coords_array = np.ascontiguousarray(coords, dtype=np.float64)
+    # If already a C-contiguous float64 array, np.ascontiguousarray returns it unchanged
+    coords_array = np.ascontiguousarray(coords, dtype=np.float64)
 
     if coords_array.ndim != 2 or coords_array.shape[1] != 3:
         raise ValueError(
@@ -56,13 +50,7 @@ def volume_from_spheres(
         raise ValueError("coords must contain at least one coordinate")
 
     # Handle and validate radii
-    if (
-        isinstance(radii, np.ndarray)
-        and radii.dtype == np.float64
-        and radii.flags.c_contiguous
-    ):
-        radii_array = radii
-    elif np.isscalar(radii):
+    if np.isscalar(radii):
         radii_array = np.full(coords_array.shape[0], radii, dtype=np.float64)
     else:
         radii_array = np.ascontiguousarray(radii, dtype=np.float64)
