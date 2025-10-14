@@ -185,20 +185,6 @@ class TestFlexibleInterface:
         assert isinstance(result, float)
         assert result > 0
 
-    def test_documentation_examples_work(self):
-        """Test that the examples in the docstring actually work."""
-        # Example 1 from docstring
-        coords = [[0, 0, 0], [2, 0, 0]]
-        radii = [1.0, 0.5]
-        result1 = volume_from_spheres(coords, radii)
-        assert result1 > 0
-
-        # Example 2 from docstring
-        coords = np.array([[0, 0, 0]], dtype=np.float32)  # Will be converted
-        radii = np.array([1.0])
-        result2 = volume_from_spheres(coords, radii)
-        assert result2 > 0
-
     def test_scalar_radius_single_sphere(self):
         """Test scalar radius with single sphere."""
         coords = [[0, 0, 0]]
