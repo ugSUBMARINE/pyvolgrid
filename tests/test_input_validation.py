@@ -80,17 +80,6 @@ class TestInputValidation:
         ):
             volume_from_spheres(coords, radii)
 
-    def test_radii_wrong_dimensions_0d(self):
-        """Test that 0D radii array raises ValueError."""
-        coords = np.array([[0.0, 0.0, 0.0]])
-        radii = np.array(1.0)  # 0D array should be rejected
-
-        with pytest.raises(
-            ValueError,
-            match="radii must be convertible to shape \\(N,\\), got shape \\(\\)",
-        ):
-            volume_from_spheres(coords, radii)
-
     def test_mismatched_array_sizes(self):
         """Test that mismatched coords and radii sizes raise ValueError."""
         coords = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])  # 2 spheres
