@@ -1,7 +1,7 @@
 from importlib.metadata import version, PackageNotFoundError
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike
 from pyvolgrid._core import _volume_from_spheres
 
 try:
@@ -11,34 +11,77 @@ except PackageNotFoundError:
 
 
 def volume_from_spheres(
-    coords: NDArray[np.float64],
-    radii: NDArray[np.float64],
+    coords: ArrayLike,
+    radii: ArrayLike | float,
     grid_spacing: float = 0.1,
 ) -> float:
     """Calculate the volume occupied by a set of spheres using a grid-based method.
+
     Parameters
     ----------
-    coords : NDArray[np.float64]
-        An array of shape (N, 3) containing the coordinates of the centers of the spheres.
-    radii : NDArray[np.float64]
-        An array of shape (N,) containing the radii of the spheres.
-    grid_spacing : SupportsFloat, optional
+    coords : array-like
+        An array-like object of shape (N, 3) containing the coordinates of the centers.
+    radii : array-like or float
+        An array-like object of shape (N,) containing the radii of the spheres.
+        If a single float is provided, all spheres are assumed to have the same radius.
+    grid_spacing : float, optional
         The spacing between grid points. Default is 0.1.
+
     Returns
     -------
     float
-        The total volume occupied by the spheres."""
+        The total volume occupied by the spheres.
 
-    if coords.ndim != 2 or coords.shape[1] != 3:
-        raise ValueError("coords must be of shape (N, 3)")
-    if radii.ndim != 1 or radii.shape[0] != coords.shape[0]:
+    Notes
+    -----
+    If necessary, input arrays are automatically converted to C-contiguous float64 numpy arrays
+    as required by the underlying C++ implementation.
+    """
+
+    # Handle and validate coords
+    if (
+        isinstance(coords, np.ndarray)
+        and coords.dtype == np.float64
+        and coords.flags.c_contiguous
+    ):
+        coords_array = coords
+    else:
+        coords_array = np.ascontiguousarray(coords, dtype=np.float64)
+
+    if coords_array.ndim != 2 or coords_array.shape[1] != 3:
         raise ValueError(
-            "radii must be of shape (N,) and match the number of coordinates"
+            f"coords must be convertible to shape (N, 3), got shape {coords_array.shape}"
         )
+    if coords_array.shape[0] == 0:
+        raise ValueError("coords must contain at least one coordinate")
+
+    # Handle and validate radii
+    if (
+        isinstance(radii, np.ndarray)
+        and radii.dtype == np.float64
+        and radii.flags.c_contiguous
+    ):
+        radii_array = radii
+    elif np.isscalar(radii):
+        radii_array = np.full(coords_array.shape[0], float(radii), dtype=np.float64)
+    else:
+        radii_array = np.ascontiguousarray(radii, dtype=np.float64)
+
+    if radii_array.ndim != 1:
+        raise ValueError(
+            f"radii must be convertible to shape (N,), got shape {radii_array.shape}"
+        )
+    if radii_array.shape[0] != coords_array.shape[0]:
+        raise ValueError(
+            f"Number of radii ({radii_array.shape[0]}) must match number of coordinates ({coords_array.shape[0]})"
+        )
+
+    # Validate grid spacing
     if grid_spacing <= 0.0:
         raise ValueError("grid_spacing must be greater than 0.0")
 
-    return _volume_from_spheres(coords, radii, grid_spacing)
+    # Call the C++ function with guaranteed C-contiguous float64 arrays
+    return _volume_from_spheres(coords_array, radii_array, grid_spacing)
 
 
 __all__ = ["__version__", "volume_from_spheres"]

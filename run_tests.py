@@ -37,6 +37,9 @@ def main():
         print("  validation   - Run input validation tests only")
         print("  calculation  - Run volume calculation tests only")
         print("  edge         - Run edge case tests only")
+        print("  flexible     - Run flexible interface tests only")
+        print("  arrays       - Run array requirements tests only")
+        print("  scalar       - Run scalar radius tests only")
         print("  single <test> - Run a single test")
         return 1
 
@@ -92,6 +95,24 @@ def main():
         success = run_command(
             ["uv", "run", "pytest", "tests/test_edge_cases.py", "-v", "-m", "not slow"],
             "Edge case tests",
+        )
+
+    elif command == "flexible":
+        success = run_command(
+            ["uv", "run", "pytest", "tests/test_flexible_interface.py", "-v"],
+            "Flexible interface tests",
+        )
+
+    elif command == "arrays":
+        success = run_command(
+            ["uv", "run", "pytest", "tests/test_array_requirements.py", "-v"],
+            "Array requirements tests",
+        )
+
+    elif command == "scalar":
+        success = run_command(
+            ["uv", "run", "pytest", "-v", "-k", "scalar_radius"],
+            "Scalar radius tests",
         )
 
     elif command == "single":

@@ -30,7 +30,10 @@ class TestInputValidation:
         coords = np.array([0.0, 0.0, 0.0])  # Should be (1, 3)
         radii = np.array([1.0])
 
-        with pytest.raises(ValueError, match="coords must be of shape \\(N, 3\\)"):
+        with pytest.raises(
+            ValueError,
+            match="coords must be convertible to shape \\(N, 3\\), got shape \\(3,\\)",
+        ):
             volume_from_spheres(coords, radii)
 
     def test_coords_wrong_dimensions_3d(self):
@@ -38,7 +41,10 @@ class TestInputValidation:
         coords = np.array([[[0.0, 0.0, 0.0]]])  # Should be (1, 3)
         radii = np.array([1.0])
 
-        with pytest.raises(ValueError, match="coords must be of shape \\(N, 3\\)"):
+        with pytest.raises(
+            ValueError,
+            match="coords must be convertible to shape \\(N, 3\\), got shape \\(1, 1, 3\\)",
+        ):
             volume_from_spheres(coords, radii)
 
     def test_coords_wrong_second_dimension(self):
@@ -46,7 +52,10 @@ class TestInputValidation:
         coords = np.array([[0.0, 0.0]])  # Should have 3 columns, not 2
         radii = np.array([1.0])
 
-        with pytest.raises(ValueError, match="coords must be of shape \\(N, 3\\)"):
+        with pytest.raises(
+            ValueError,
+            match="coords must be convertible to shape \\(N, 3\\), got shape \\(1, 2\\)",
+        ):
             volume_from_spheres(coords, radii)
 
     def test_coords_four_dimensions(self):
@@ -54,7 +63,10 @@ class TestInputValidation:
         coords = np.array([[0.0, 0.0, 0.0, 0.0]])  # Should have 3 columns, not 4
         radii = np.array([1.0])
 
-        with pytest.raises(ValueError, match="coords must be of shape \\(N, 3\\)"):
+        with pytest.raises(
+            ValueError,
+            match="coords must be convertible to shape \\(N, 3\\), got shape \\(1, 4\\)",
+        ):
             volume_from_spheres(coords, radii)
 
     def test_radii_wrong_dimensions_2d(self):
@@ -64,18 +76,18 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="radii must be of shape \\(N,\\) and match the number of coordinates",
+            match="radii must be convertible to shape \\(N,\\), got shape \\(1, 1\\)",
         ):
             volume_from_spheres(coords, radii)
 
     def test_radii_wrong_dimensions_0d(self):
         """Test that 0D radii array raises ValueError."""
         coords = np.array([[0.0, 0.0, 0.0]])
-        radii = np.array(1.0)  # Should be 1D array, not scalar
+        radii = np.array(1.0)  # 0D array should be rejected
 
         with pytest.raises(
             ValueError,
-            match="radii must be of shape \\(N,\\) and match the number of coordinates",
+            match="radii must be convertible to shape \\(N,\\), got shape \\(\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -86,7 +98,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="radii must be of shape \\(N,\\) and match the number of coordinates",
+            match="Number of radii \\(1\\) must match number of coordinates \\(2\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -97,7 +109,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="radii must be of shape \\(N,\\) and match the number of coordinates",
+            match="Number of radii \\(2\\) must match number of coordinates \\(1\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -121,28 +133,29 @@ class TestInputValidation:
         """Test behavior with empty arrays."""
         coords = np.array([]).reshape(0, 3)
         radii = np.array([])
-        # The C++ implementation currently has an issue with empty arrays
-        # This should be handled gracefully in future versions
+        # Empty arrays are now caught by Python validation before reaching C++
         with pytest.raises(
-            ValueError, match="Cannot find the maximum of an empty array"
+            ValueError, match="coords must contain at least one coordinate"
         ):
             volume_from_spheres(coords, radii)
 
     def test_numpy_array_types(self):
-        """Test that function requires float64 arrays."""
-        # The C++ extension requires float64 arrays specifically
+        """Test that function now automatically converts different array types."""
+        # The function now automatically converts to float64
 
-        # Test with float32 - should fail
+        # Test with float32 - should now work
         coords_f32 = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)
         radii_f32 = np.array([1.0], dtype=np.float32)
-        with pytest.raises(TypeError):
-            volume_from_spheres(coords_f32, radii_f32)
+        result = volume_from_spheres(coords_f32, radii_f32)
+        assert isinstance(result, float)
+        assert result > 0
 
-        # Test with int - should fail
+        # Test with int - should now work
         coords_int = np.array([[0, 0, 0]], dtype=np.int32)
         radii_int = np.array([1], dtype=np.int32)
-        with pytest.raises(TypeError):
-            volume_from_spheres(coords_int, radii_int)
+        result = volume_from_spheres(coords_int, radii_int)
+        assert isinstance(result, float)
+        assert result > 0
 
         # Test with explicit float64 - should work
         coords_f64 = np.array([[0.0, 0.0, 0.0]], dtype=np.float64)
@@ -159,3 +172,22 @@ class TestInputValidation:
         result = volume_from_spheres(coords, radii, grid_spacing=0.01)
         assert isinstance(result, float)
         assert result > 0
+
+    def test_scalar_radius_input_validation(self):
+        """Test that scalar radius input is properly validated."""
+        # Valid case
+        coords = np.array([[0.0, 0.0, 0.0]])
+        radius = 1.0
+        result = volume_from_spheres(coords, radius)
+        assert isinstance(result, float)
+        assert result > 0
+
+        # Test with different scalar types
+        result_int = volume_from_spheres(coords, 1)
+        assert isinstance(result_int, float)
+        assert result_int > 0
+
+        # Test with numpy scalars
+        result_np = volume_from_spheres(coords, np.float64(1.0))
+        assert isinstance(result_np, float)
+        assert result_np > 0

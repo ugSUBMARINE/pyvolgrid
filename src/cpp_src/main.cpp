@@ -8,14 +8,35 @@ double calc_vol(py::array_t<double> coords, py::array_t<double> radii, double gr
     py::buffer_info buf1 = coords.request();
     py::buffer_info buf2 = radii.request();
 
-    // Basic validation of input shapes is done in Python before calling this function.
-    // Uncomment the following lines for additional safety checks in C++:
-    // if (buf1.ndim != 2 || buf1.shape[1] != 3) {
-    //     throw std::runtime_error("Coordinates array must be of shape (N, 3).");
-    // }
-    // if (buf2.ndim != 1 || buf2.shape[0] != buf1.shape[0]) {
-    //     throw std::runtime_error("Radii array must be 1D and match number of coordinates.");
-    // }
+    // Validate array properties (C-contiguous arrays are enforced by template parameter)
+    // Additional shape validation for extra safety
+    if (buf1.ndim != 2 || buf1.shape[1] != 3) {
+        throw std::runtime_error("Coordinates array must be of shape (N, 3).");
+    }
+    if (buf2.ndim != 1 || buf2.shape[0] != buf1.shape[0]) {
+        throw std::runtime_error("Radii array must be 1D and match number of coordinates.");
+    }
+    
+    // Verify C-contiguous layout by checking strides
+    // For C-contiguous arrays, the last dimension should have stride equal to element size
+    // and each previous dimension should have stride equal to (stride of next dim * size of next dim)
+    bool coords_contiguous = true;
+    if (buf1.strides[buf1.ndim-1] != sizeof(double)) {
+        coords_contiguous = false;
+    }
+    for (int i = buf1.ndim - 2; i >= 0; --i) {
+        if (buf1.strides[i] != buf1.strides[i+1] * buf1.shape[i+1]) {
+            coords_contiguous = false;
+            break;
+        }
+    }
+    if (!coords_contiguous) {
+        throw std::runtime_error("Coordinates array must be C-contiguous.");
+    }
+    
+    if (buf2.strides[0] != sizeof(double)) {
+        throw std::runtime_error("Radii array must be C-contiguous.");
+    }
 
     double* ptr_coords = static_cast<double*>(buf1.ptr);
     double* ptr_radii = static_cast<double*>(buf2.ptr);
@@ -37,15 +58,18 @@ PYBIND11_MODULE(_core, m) {
         Calculate the volume occupied by spheres using a grid-based approach.
 
         Args:
-            coords: N x 3 array of sphere center coordinates (float64)
-            radii: 1D array of sphere radii (float64, length N)
+            coords: N x 3 array of sphere center coordinates (float64, C-contiguous)
+            radii: 1D array of sphere radii (float64, length N, C-contiguous)
             grid_spacing: Grid spacing for the volume calculation (float64)
 
         Returns:
             float: Estimated volume occupied by the spheres
 
         Raises:
-            RuntimeError: If input arrays have incorrect shapes or sizes
+            RuntimeError: If input arrays have incorrect shapes, sizes, or memory layout
+        
+        Notes:
+            Arrays must be C-contiguous and float64. Non-contiguous arrays will be rejected.
   )pbdoc",
   py::arg("coords").noconvert(), py::arg("radii").noconvert(), py::arg("grid_spacing")
   );
