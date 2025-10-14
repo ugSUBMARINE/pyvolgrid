@@ -63,7 +63,7 @@ def volume_from_spheres(
     ):
         radii_array = radii
     elif np.isscalar(radii):
-        radii_array = np.full(coords_array.shape[0], float(radii), dtype=np.float64)
+        radii_array = np.full(coords_array.shape[0], radii, dtype=np.float64)
     else:
         radii_array = np.ascontiguousarray(radii, dtype=np.float64)
 
