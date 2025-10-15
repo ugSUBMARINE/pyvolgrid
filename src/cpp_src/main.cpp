@@ -4,7 +4,9 @@
 
 namespace py = pybind11;
 
-double calc_vol(py::array_t<double> coords, py::array_t<double> radii, double grid_spacing) {
+double calc_vol(
+    py::array_t<double, py::array::c_style> coords, py::array_t<double, py::array::c_style> radii, double grid_spacing
+) {
     py::buffer_info buf1 = coords.request();
     py::buffer_info buf2 = radii.request();
 
