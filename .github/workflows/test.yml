@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -14,83 +14,77 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        enable-cache: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
 
-    - name: Install dependencies
-      run: uv sync --group dev
+      - name: Install dependencies
+        run: uv sync --group dev
 
-    - name: Install package
-      run: uv pip install -e . --no-deps
+      - name: Install package
+        run: uv pip install -e . --no-deps
 
-    - name: Run tests
-      run: uv run pytest -v -m "not slow"
+      - name: Run tests
+        run: uv run pytest -v -m "not slow"
 
-    - name: Run type checking
-      run: uv run mypy src/
-      if: matrix.python-version != '3.9'  # Skip mypy for Python 3.9
+      - name: Run type checking
+        run: uv run mypy src/
 
   test-numpy-versions:
     name: Test NumPy compatibility
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        numpy-version: ['1.26.0', '2.0.0', '2.1.0', 'latest']
-        python-version: ['3.11', '3.12', '3.13']
+        numpy-version: ["1.26.*", "2.*"]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        enable-cache: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
 
-    - name: Install dependencies
-      run: uv sync --group dev
+      - name: Install dependencies
+        run: uv sync --group dev
 
-    - name: Install specific NumPy version
-      run: |
-        if [ "${{ matrix.numpy-version }}" = "latest" ]; then
-          uv pip install "numpy>=2.0"
-        else
-          uv pip install "numpy==${{ matrix.numpy-version }}"
-        fi
+      - name: Install specific NumPy version
+        run: uv pip install "numpy~=${{ matrix.numpy-version }}"
 
-    - name: Install package
-      run: uv pip install -e . --no-deps
+      - name: Install package
+        run: uv pip install -e . --no-deps
 
-    - name: Test import and basic functionality
-      run: |
-        uv run python -c "
-        import numpy as np
-        import pyvolgrid
-        print(f'NumPy version: {np.__version__}')
-        print(f'PyVolGrid version: {pyvolgrid.__version__}')
-        
-        # Test basic functionality
-        coords = [[0, 0, 0], [2, 0, 0]]
-        radii = [1.0, 0.5]
-        volume = pyvolgrid.volume_from_spheres(coords, radii)
-        print(f'Test volume calculation: {volume:.3f}')
-        "
+      - name: Test import and basic functionality
+        run: |
+          uv run python -c "
+          import numpy as np
+          import pyvolgrid
+          print(f'NumPy version: {np.__version__}')
+          print(f'PyVolGrid version: {pyvolgrid.__version__}')
 
-    - name: Run core tests
-      run: uv run pytest tests/test_volume_calculation.py -v
+          # Test basic functionality
+          coords = [[0, 0, 0], [2, 0, 0]]
+          radii = [1.0, 0.5]
+          volume = pyvolgrid.volume_from_spheres(coords, radii)
+          print(f'Test volume calculation: {volume:.3f}')
+          "
+
+      - name: Run core tests
+        run: uv run pytest tests/test_volume_calculation.py -v
