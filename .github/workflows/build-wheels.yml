@@ -12,6 +12,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: Build Linux wheels (x86_64)
@@ -66,7 +67,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
 
           # Test the built wheels
-          CIBW_TEST_COMMAND: "python -c 'import pyvolgrid; print(pyvolgrid.__version__)'"
+          CIBW_TEST_COMMAND: 'python -c "import pyvolgrid; print(pyvolgrid.__version__)"'
 
           # Additional environment overrides (per platform)
           CIBW_ENVIRONMENT: ${{ matrix.cibw_environment }}
