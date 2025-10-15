@@ -10,33 +10,33 @@ double calc_vol(py::array_t<double> coords, py::array_t<double> radii, double gr
 
     // Validate array properties (C-contiguous arrays are enforced by template parameter)
     // Additional shape validation for extra safety
-    if (buf1.ndim != 2 || buf1.shape[1] != 3) {
-        throw std::runtime_error("Coordinates array must be of shape (N, 3).");
-    }
-    if (buf2.ndim != 1 || buf2.shape[0] != buf1.shape[0]) {
-        throw std::runtime_error("Radii array must be 1D and match number of coordinates.");
-    }
-    
+    // if (buf1.ndim != 2 || buf1.shape[1] != 3) {
+    //     throw std::runtime_error("Coordinates array must be of shape (N, 3).");
+    // }
+    // if (buf2.ndim != 1 || buf2.shape[0] != buf1.shape[0]) {
+    //     throw std::runtime_error("Radii array must be 1D and match number of coordinates.");
+    // }
+
     // Verify C-contiguous layout by checking strides
     // For C-contiguous arrays, the last dimension should have stride equal to element size
     // and each previous dimension should have stride equal to (stride of next dim * size of next dim)
-    bool coords_contiguous = true;
-    if (buf1.strides[buf1.ndim-1] != sizeof(double)) {
-        coords_contiguous = false;
-    }
-    for (int i = buf1.ndim - 2; i >= 0; --i) {
-        if (buf1.strides[i] != buf1.strides[i+1] * buf1.shape[i+1]) {
-            coords_contiguous = false;
-            break;
-        }
-    }
-    if (!coords_contiguous) {
-        throw std::runtime_error("Coordinates array must be C-contiguous.");
-    }
-    
-    if (buf2.strides[0] != sizeof(double)) {
-        throw std::runtime_error("Radii array must be C-contiguous.");
-    }
+    // bool coords_contiguous = true;
+    // if (buf1.strides[buf1.ndim-1] != sizeof(double)) {
+    //     coords_contiguous = false;
+    // }
+    // for (int i = buf1.ndim - 2; i >= 0; --i) {
+    //     if (buf1.strides[i] != buf1.strides[i+1] * buf1.shape[i+1]) {
+    //         coords_contiguous = false;
+    //         break;
+    //     }
+    // }
+    // if (!coords_contiguous) {
+    //     throw std::runtime_error("Coordinates array must be C-contiguous.");
+    // }
+
+    // if (buf2.strides[0] != sizeof(double)) {
+    //     throw std::runtime_error("Radii array must be C-contiguous.");
+    // }
 
     double* ptr_coords = static_cast<double*>(buf1.ptr);
     double* ptr_radii = static_cast<double*>(buf2.ptr);
@@ -65,11 +65,8 @@ PYBIND11_MODULE(_core, m) {
         Returns:
             float: Estimated volume occupied by the spheres
 
-        Raises:
-            RuntimeError: If input arrays have incorrect shapes, sizes, or memory layout
-        
         Notes:
-            Arrays must be C-contiguous and float64. Non-contiguous arrays will be rejected.
+            Arrays must be C-contiguous and float64.
   )pbdoc",
   py::arg("coords").noconvert(), py::arg("radii").noconvert(), py::arg("grid_spacing")
   );
