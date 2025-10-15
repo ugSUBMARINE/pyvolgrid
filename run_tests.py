@@ -30,7 +30,7 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python run_tests.py <command>")
         print("\nAvailable commands:")
-        print("  all          - Run all tests (excluding slow ones)")
+        print("  all          - Run all tests")
         print("  fast         - Run fast tests only")
         print("  slow         - Run slow tests only")
         print("  coverage     - Run tests with coverage report")
@@ -47,7 +47,7 @@ def main():
 
     if command == "all":
         success = run_command(
-            ["uv", "run", "pytest", "-v", "-m", "not slow"],
+            ["uv", "run", "pytest", "-v"],
             "All tests (excluding slow)",
         )
 
