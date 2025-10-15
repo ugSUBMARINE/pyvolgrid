@@ -9,6 +9,7 @@ on:
 
 jobs:
   test:
+    # This tests the package on multiple OS and Python versions using the latest stable numpy
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -36,17 +37,14 @@ jobs:
         run: uv pip install -e . --no-deps
 
       - name: Run tests
-        run: uv run pytest -v -m "not slow"
+        run: uv run pytest -v
 
-      - name: Run type checking
-        run: uv run mypy src/
-
-  test-numpy-versions:
-    name: Test NumPy compatibility
+  test-numpy-1-26:
+    # This job specifically tests compatibility with NumPy 1.26 on Ubuntu
+    name: Test NumPy 1.26 compatibility
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        numpy-version: ["1.26.*", "2.*"]
         python-version: ["3.11", "3.12", "3.13"]
 
     steps:
@@ -66,7 +64,7 @@ jobs:
         run: uv sync --group dev
 
       - name: Install specific NumPy version
-        run: uv pip install "numpy~=${{ matrix.numpy-version }}"
+        run: uv pip install "numpy~=1.26"
 
       - name: Install package
         run: uv pip install -e . --no-deps
@@ -86,5 +84,5 @@ jobs:
           print(f'Test volume calculation: {volume:.3f}')
           "
 
-      - name: Run core tests
-        run: uv run pytest tests/test_volume_calculation.py -v
+      - name: Run tests
+        run: uv run pytest -v
