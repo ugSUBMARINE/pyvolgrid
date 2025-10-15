@@ -2,14 +2,35 @@
 name = "pyvolgrid"
 version = "0.1.0"
 description = "Python package for estimating the total volume of overlapping spheres using a grid-based numerical approach."
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {text = "MIT"}
 authors = [
     { name = "Karl Gruber", email = "gammaturn@gmail.com" }
 ]
-requires-python = ">=3.13"
+maintainers = [
+    {name = "Karl Gruber", email = "gammaturn@gmail.com"},
+]
+keywords = ["molecular modeling", "structural bioinformatics", "computational chemistry", "volume calculation", "grid-based methods"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.3.3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ugSUBMARINE/pyvolgrid"
+Documentation = "https://github.com/ugSUBMARINE/pyvolgrid#readme"
+Repository = "https://github.com/ugSUBMARINE/pyvolgrid.git"
+"Bug Tracker" = "https://github.com/ugSUBMARINE/pyvolgrid/issues"
+Changelog = "https://github.com/ugSUBMARINE/pyvolgrid/releases"
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"

@@ -106,7 +106,7 @@ print(f"Coarse: {volume_coarse:.2f}, Fine: {volume_fine:.2f}")
 
 ## License
 
-MIT License © 2025 Karl Gruber
+This project is licensed under the MIT License.
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.
