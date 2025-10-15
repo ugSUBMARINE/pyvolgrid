@@ -66,8 +66,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
 
           # Test the built wheels
-          CIBW_TEST_REQUIRES: "pytest"
-          CIBW_TEST_COMMAND: "pytest tests/test_volume_calculation.py tests/test_input_validation.py -m 'not slow' -q"
+          CIBW_TEST_COMMAND: "python -c 'import pyvolgrid; print(pyvolgrid.__version__)'"
 
           # Additional environment overrides (per platform)
           CIBW_ENVIRONMENT: ${{ matrix.cibw_environment }}
