@@ -37,25 +37,6 @@ minimum-version = "build-system.requires"
 build-dir = "build/{wheel_tag}"
 sdist.exclude = [".github/", "tests/", ".python-version", "uv.lock", "run_tests.py"]
 
-[tool.cibuildwheel]
-# Build for Python 3.11-3.13
-build = "cp311-* cp312-* cp313-*"
-# Skip 32-bit builds and musllinux
-skip = "*-win32 *-manylinux_i686 *-musllinux*"
-# Test the built wheels
-test-command = "python -c 'import pyvolgrid; print(pyvolgrid.__version__)'"
-
-[tool.cibuildwheel.macos]
-# Build universal wheels for macOS
-archs = ["x86_64", "arm64", "universal2"]
-environment = { CMAKE_OSX_ARCHITECTURES = "x86_64;arm64", ARCHFLAGS = "-arch x86_64 -arch arm64" }
-
-[tool.cibuildwheel.linux]
-archs = ["x86_64", "aarch64"]
-
-[tool.cibuildwheel.windows]
-archs = ["AMD64"]
-
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.{h,c,hpp,cpp}" }, { file = "CMakeLists.txt" }]
 
