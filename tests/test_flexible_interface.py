@@ -143,9 +143,7 @@ class TestFlexibleInterface:
         coords = [[0, 0, 0]]
         radii = [[1.0]]  # 2D instead of 1D
 
-        with pytest.raises(
-            ValueError, match="radii must be 1-dimensional, got shape"
-        ):
+        with pytest.raises(ValueError, match="radii must be 1-dimensional, got shape"):
             volume_from_spheres(coords, radii)
 
     def test_consistency_with_numpy_arrays(self):

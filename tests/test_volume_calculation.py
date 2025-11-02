@@ -2,7 +2,6 @@
 
 import math
 import numpy as np
-import pytest
 
 from pyvolgrid import volume_from_spheres
 

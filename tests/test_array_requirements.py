@@ -1,7 +1,6 @@
 """Tests for automatic array conversion and requirements in PyVolGrid."""
 
 import numpy as np
-import pytest
 
 from pyvolgrid import volume_from_spheres
 

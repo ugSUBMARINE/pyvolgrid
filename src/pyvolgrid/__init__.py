@@ -45,9 +45,7 @@ def volume_from_spheres(
 
     # Shape validation for coords
     if coords_arr.ndim != 2 or coords_arr.shape[1] != 3:
-        raise ValueError(
-            f"coords must have shape (N, 3), got shape {coords_arr.shape}"
-        )
+        raise ValueError(f"coords must have shape (N, 3), got shape {coords_arr.shape}")
     if coords_arr.shape[0] == 0:
         raise ValueError("coords must contain at least one coordinate")
 
@@ -76,9 +74,7 @@ def volume_from_spheres(
 
     # Validate radii
     if radii_array.ndim != 1:
-        raise ValueError(
-            f"radii must be 1-dimensional, got shape {radii_array.shape}"
-        )
+        raise ValueError(f"radii must be 1-dimensional, got shape {radii_array.shape}")
     if radii_array.shape[0] != coords_array.shape[0]:
         raise ValueError(
             f"Number of radii ({radii_array.shape[0]}) must match number of coordinates ({coords_array.shape[0]})"
