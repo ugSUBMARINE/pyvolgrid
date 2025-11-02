@@ -1,6 +1,6 @@
 [project]
 name = "pyvolgrid"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python package for estimating the total volume of overlapping spheres using a grid-based numerical approach."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {text = "MIT"}
