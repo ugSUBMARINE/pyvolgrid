@@ -1,7 +1,8 @@
 from importlib.metadata import PackageNotFoundError, version
+from typing import cast
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 from pyvolgrid._core import _volume_from_spheres_float32, _volume_from_spheres_float64
 
@@ -69,7 +70,7 @@ def volume_from_spheres(
     coords_array = np.ascontiguousarray(coords_arr, dtype=DTYPE)
 
     if radii_is_scalar:
-        radii_array = np.full(coords_array.shape[0], float(radii), dtype=DTYPE)
+        radii_array = np.full(coords_array.shape[0], radii, dtype=DTYPE)
     else:
         radii_array = np.ascontiguousarray(radii_arr, dtype=DTYPE)
 
@@ -82,9 +83,13 @@ def volume_from_spheres(
         )
 
     if use_float32:
-        return _volume_from_spheres_float32(coords_array, radii_array, grid_spacing)
-    else:
-        return _volume_from_spheres_float64(coords_array, radii_array, grid_spacing)
+        coords_f32 = cast(NDArray[np.float32], coords_array)
+        radii_f32 = cast(NDArray[np.float32], radii_array)
+        return _volume_from_spheres_float32(coords_f32, radii_f32, grid_spacing)
+
+    coords_f64 = cast(NDArray[np.float64], coords_array)
+    radii_f64 = cast(NDArray[np.float64], radii_array)
+    return _volume_from_spheres_float64(coords_f64, radii_f64, grid_spacing)
 
 
 __all__ = ["volume_from_spheres"]
