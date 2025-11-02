@@ -2,7 +2,6 @@ name: Build and upload to PyPI
 
 on:
   push:
-    branches: [main]
     tags:
       - "v*"
   workflow_dispatch:
@@ -126,11 +125,11 @@ jobs:
           verbose: true
 
   upload_test_pypi:
-    name: Upload to Test PyPI
+    name: Upload to Test PyPI (manual)
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
-    # Upload to test PyPI on main branch pushes (for testing)
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only upload to Test PyPI on manual workflow dispatch
+    if: github.event_name == 'workflow_dispatch'
     environment:
       name: testpypi
       url: https://test.pypi.org/p/pyvolgrid
