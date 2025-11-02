@@ -32,7 +32,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="coords must be convertible to shape \\(N, 3\\), got shape \\(3,\\)",
+            match="coords must have shape \\(N, 3\\), got shape \\(3,\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -43,7 +43,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="coords must be convertible to shape \\(N, 3\\), got shape \\(1, 1, 3\\)",
+            match="coords must have shape \\(N, 3\\), got shape \\(1, 1, 3\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -54,7 +54,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="coords must be convertible to shape \\(N, 3\\), got shape \\(1, 2\\)",
+            match="coords must have shape \\(N, 3\\), got shape \\(1, 2\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -65,7 +65,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="coords must be convertible to shape \\(N, 3\\), got shape \\(1, 4\\)",
+            match="coords must have shape \\(N, 3\\), got shape \\(1, 4\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -76,7 +76,7 @@ class TestInputValidation:
 
         with pytest.raises(
             ValueError,
-            match="radii must be convertible to shape \\(N,\\), got shape \\(1, 1\\)",
+            match="radii must be 1-dimensional, got shape \\(1, 1\\)",
         ):
             volume_from_spheres(coords, radii)
 

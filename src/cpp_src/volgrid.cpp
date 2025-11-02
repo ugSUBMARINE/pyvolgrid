@@ -7,11 +7,11 @@
 #include <algorithm>
 
 template<typename T>
-T volume_of_spheres(const T* coords, const T* radii, size_t& n_spheres, T& grid_spacing)
+T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, const T grid_spacing)
 {
     // calculate origin and extent of the grid
-    TRi extent;
-    TRd<T> origin;
+    TR<int> extent;
+    TR<T> origin;
     T cushion = grid_spacing + get_max(radii, n_spheres);
     get_grid_params(coords, n_spheres, cushion, grid_spacing, extent, origin);
 
@@ -82,7 +82,7 @@ T volume_of_spheres(const T* coords, const T* radii, size_t& n_spheres, T& grid_
 }
 
 template<typename T>
-T get_max(const T* array, size_t& n)
+T get_max(const T* array, const size_t n)
 {
     if (n == 0) {
         throw std::invalid_argument("Cannot find the maximum of an empty array.");
@@ -101,11 +101,11 @@ T get_max(const T* array, size_t& n)
 template<typename T>
 void get_grid_params(
     const T* coords, const size_t& n_coords, const T& cushion, const T& grid_spacing,
-    TRi& extent, TRd<T>& origin
+    TR<int>& extent, TR<T>& origin
 )
 {
     // extent of coordinates in cartesian
-    TRd<T> min_coords, max_coords;
+    TR<T> min_coords, max_coords;
     get_extent(coords, n_coords, min_coords, max_coords);
 
      // calculate extent in grid units
@@ -122,7 +122,7 @@ void get_grid_params(
 }
 
 template<typename T>
-void get_extent(const T* coords, const size_t& n_coords, TRd<T>& min_coords, TRd<T>& max_coords)
+void get_extent(const T* coords, const size_t& n_coords, TR<T>& min_coords, TR<T>& max_coords)
 {
     if (n_coords == 0) {
         throw std::invalid_argument("Cannot determine min/max of an empty array.");
@@ -147,20 +147,21 @@ void get_extent(const T* coords, const size_t& n_coords, TRd<T>& min_coords, TRd
     }
 }
 
-// Explicit template instantiations for float and double
-template struct TRd<float>;
-template struct TRd<double>;
+// Explicit template instantiations for int, float and double
+template struct TR<int>;
+template struct TR<float>;
+template struct TR<double>;
 
-template float get_max<float>(const float*, size_t&);
-template double get_max<double>(const double*, size_t&);
+template float get_max<float>(const float*, const size_t);
+template double get_max<double>(const double*, const size_t);
 
-template void get_extent<float>(const float*, const size_t&, TRd<float>&, TRd<float>&);
-template void get_extent<double>(const double*, const size_t&, TRd<double>&, TRd<double>&);
+template void get_extent<float>(const float*, const size_t&, TR<float>&, TR<float>&);
+template void get_extent<double>(const double*, const size_t&, TR<double>&, TR<double>&);
 
 template void get_grid_params<float>(const float*, const size_t&,
-                                      const float&, const float&, TRi&, TRd<float>&);
+                                      const float&, const float&, TR<int>&, TR<float>&);
 template void get_grid_params<double>(const double*, const size_t&,
-                                       const double&, const double&, TRi&, TRd<double>&);
+                                       const double&, const double&, TR<int>&, TR<double>&);
 
-template float volume_of_spheres<float>(const float*, const float*, size_t&, float&);
-template double volume_of_spheres<double>(const double*, const double*, size_t&, double&);
+template float volume_of_spheres<float>(const float*, const float*, const size_t, const float);
+template double volume_of_spheres<double>(const double*, const double*, const size_t, const double);

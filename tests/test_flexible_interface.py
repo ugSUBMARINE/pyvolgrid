@@ -111,7 +111,7 @@ class TestFlexibleInterface:
         # Now catches the error earlier in Python validation
         with pytest.raises(
             ValueError,
-            match="coords must be convertible to shape \\(N, 3\\), got shape \\(0,\\)",
+            match="coords must have shape \\(N, 3\\), got shape \\(0,\\)",
         ):
             volume_from_spheres(coords, radii)
 
@@ -134,7 +134,7 @@ class TestFlexibleInterface:
 
         with pytest.raises(
             ValueError,
-            match="coords must be convertible to shape \\(N, 3\\), got shape",
+            match="coords must have shape \\(N, 3\\), got shape",
         ):
             volume_from_spheres(coords, radii)
 
@@ -144,7 +144,7 @@ class TestFlexibleInterface:
         radii = [[1.0]]  # 2D instead of 1D
 
         with pytest.raises(
-            ValueError, match="radii must be convertible to shape \\(N,\\), got shape"
+            ValueError, match="radii must be 1-dimensional, got shape"
         ):
             volume_from_spheres(coords, radii)
 

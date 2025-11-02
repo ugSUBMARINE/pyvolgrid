@@ -13,9 +13,12 @@ double calc_vol_float64(
     size_t n_spheres = static_cast<size_t>(coords.shape(0));
     const double* ptr_coords = coords.data();
     const double* ptr_radii = radii.data();
-    double gs = grid_spacing;
-    
-    double volume = volume_of_spheres<double>(ptr_coords, ptr_radii, n_spheres, gs);
+
+    double volume;
+    {
+        py::gil_scoped_release release;
+        volume = volume_of_spheres<double>(ptr_coords, ptr_radii, n_spheres, grid_spacing);
+    }
     return volume;
 }
 
@@ -28,9 +31,12 @@ double calc_vol_float32(
     size_t n_spheres = static_cast<size_t>(coords.shape(0));
     const float* ptr_coords = coords.data();
     const float* ptr_radii = radii.data();
-    float gs = grid_spacing;
-    
-    float volume = volume_of_spheres<float>(ptr_coords, ptr_radii, n_spheres, gs);
+
+    float volume;
+    {
+        py::gil_scoped_release release;
+        volume = volume_of_spheres<float>(ptr_coords, ptr_radii, n_spheres, grid_spacing);
+    }
     return static_cast<double>(volume);
 }
 
@@ -54,8 +60,7 @@ PYBIND11_MODULE(_core, m) {
         )pbdoc",
         py::arg("coords").noconvert(),
         py::arg("radii").noconvert(),
-        py::arg("grid_spacing") = 0.1,
-        py::call_guard<py::gil_scoped_release>()
+        py::arg("grid_spacing") = 0.1
     );
 
     m.def("_volume_from_spheres_float32", &calc_vol_float32,
@@ -75,7 +80,6 @@ PYBIND11_MODULE(_core, m) {
         )pbdoc",
         py::arg("coords").noconvert(),
         py::arg("radii").noconvert(),
-        py::arg("grid_spacing") = 0.1f,
-        py::call_guard<py::gil_scoped_release>()
+        py::arg("grid_spacing") = 0.1f
     );
 }
