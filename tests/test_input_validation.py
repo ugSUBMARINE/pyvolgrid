@@ -123,9 +123,7 @@ class TestInputValidation:
         coords = np.array([]).reshape(0, 3)
         radii = np.array([])
         # Empty arrays are now caught by Python validation before reaching C++
-        with pytest.raises(
-            ValueError, match="coords must contain at least one coordinate"
-        ):
+        with pytest.raises(ValueError, match="coords must contain at least one coordinate"):
             volume_from_spheres(coords, radii)
 
     def test_numpy_array_types(self):

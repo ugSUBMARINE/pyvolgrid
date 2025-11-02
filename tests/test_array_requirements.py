@@ -25,9 +25,7 @@ class TestArrayRequirements:
     def test_non_contiguous_coords_accepted(self):
         """Test that non-contiguous coordinate arrays are automatically converted."""
         # Create a non-contiguous array by slicing
-        large_coords = np.array(
-            [[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64
-        )
+        large_coords = np.array([[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64)
         non_contiguous_coords = large_coords[:, :3]  # Creates non-contiguous view
         radii = np.array([1.0, 1.0], dtype=np.float64)
 
@@ -61,9 +59,7 @@ class TestArrayRequirements:
     def test_ascontiguousarray_works(self):
         """Test that np.ascontiguousarray can fix non-contiguous arrays."""
         # Create non-contiguous coords
-        large_coords = np.array(
-            [[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64
-        )
+        large_coords = np.array([[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64)
         non_contiguous_coords = large_coords[:, :3]
         radii = np.array([1.0, 1.0], dtype=np.float64)
 
@@ -82,9 +78,7 @@ class TestArrayRequirements:
     def test_fortran_contiguous_accepted(self):
         """Test that Fortran-contiguous arrays are automatically converted."""
         # Create Fortran-contiguous array (need larger array to ensure it's not also C-contiguous)
-        coords_f = np.array(
-            [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]], dtype=np.float64, order="F"
-        )
+        coords_f = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]], dtype=np.float64, order="F")
         radii = np.array([1.0, 1.0], dtype=np.float64)
 
         # Verify it's Fortran-contiguous
@@ -115,9 +109,7 @@ class TestArrayRequirements:
     def test_mixed_requirements_converted(self):
         """Test that arrays with multiple issues are automatically fixed."""
         # Create float32 array that's also non-contiguous
-        large_coords = np.array(
-            [[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float32
-        )  # Wrong dtype
+        large_coords = np.array([[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float32)  # Wrong dtype
         non_contiguous_coords = large_coords[:, :3]  # Wrong layout
         radii = np.array([1.0, 1.0], dtype=np.float64)  # Correct
 
@@ -133,9 +125,7 @@ class TestArrayRequirements:
     def test_stride_behavior_with_conversion(self):
         """Test stride behavior when arrays are automatically converted."""
         # Create non-contiguous array
-        large_coords = np.array(
-            [[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64
-        )
+        large_coords = np.array([[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64)
         non_contiguous_coords = large_coords[:, :3]
         radii = np.array([1.0, 1.0], dtype=np.float64)
 

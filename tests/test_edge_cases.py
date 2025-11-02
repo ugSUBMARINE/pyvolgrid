@@ -1,6 +1,7 @@
 """Tests for edge cases and performance in PyVolGrid."""
 
 import time
+
 import numpy as np
 import pytest
 
@@ -58,9 +59,7 @@ class TestEdgeCases:
         assert volume > 0
 
         # Should be similar to sphere at origin
-        origin_volume = volume_from_spheres(
-            np.array([[0.0, 0.0, 0.0]]), np.array([1.0]), grid_spacing=0.1
-        )
+        origin_volume = volume_from_spheres(np.array([[0.0, 0.0, 0.0]]), np.array([1.0]), grid_spacing=0.1)
 
         # Allow some numerical difference but should be close
         relative_error = abs(volume - origin_volume) / origin_volume
@@ -89,9 +88,7 @@ class TestEdgeCases:
         assert volume > 0
 
         # Should be dominated by the large sphere
-        large_sphere_volume = volume_from_spheres(
-            coords[:1], radii[:1], grid_spacing=0.2
-        )
+        large_sphere_volume = volume_from_spheres(coords[:1], radii[:1], grid_spacing=0.2)
 
         # Total volume should be close to large sphere volume (others are much smaller/distant)
         assert volume >= large_sphere_volume * 0.9
@@ -141,9 +138,7 @@ class TestEdgeCases:
         assert volume > 0
 
         # Should be similar to sphere exactly at origin
-        origin_volume = volume_from_spheres(
-            np.array([[0.0, 0.0, 0.0]]), radii, grid_spacing=0.1
-        )
+        origin_volume = volume_from_spheres(np.array([[0.0, 0.0, 0.0]]), radii, grid_spacing=0.1)
 
         relative_error = abs(volume - origin_volume) / origin_volume
         assert relative_error < 0.1
@@ -159,9 +154,7 @@ class TestEdgeCases:
 
         # Should be approximately equal (all spheres overlap completely)
         relative_error = abs(combined_volume - single_volume) / single_volume
-        assert relative_error < 0.05, (
-            f"Identical overlapping spheres error: {relative_error:.3f}"
-        )
+        assert relative_error < 0.05, f"Identical overlapping spheres error: {relative_error:.3f}"
 
     def test_linear_arrangement_of_spheres(self):
         """Test spheres arranged in a line."""
@@ -174,9 +167,7 @@ class TestEdgeCases:
 
         # Should be less than or approximately equal to sum of individual volumes due to overlaps
         # (Note: numerical precision might cause small variations)
-        total_individual = n_spheres * volume_from_spheres(
-            coords[:1], radii[:1], grid_spacing=0.1
-        )
+        total_individual = n_spheres * volume_from_spheres(coords[:1], radii[:1], grid_spacing=0.1)
         # Allow for small numerical differences while still expecting some overlap effect
         assert volume <= total_individual * 1.01, (
             f"Expected volume {volume} <= {total_individual * 1.01} (with small tolerance)"

@@ -62,9 +62,7 @@ class TestFlexibleInterface:
     def test_non_contiguous_arrays_converted(self):
         """Test that non-contiguous arrays are converted automatically."""
         # Create non-contiguous array
-        large_coords = np.array(
-            [[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64
-        )
+        large_coords = np.array([[0.0, 0.0, 0.0, 999.0], [1.0, 1.0, 1.0, 999.0]], dtype=np.float64)
         non_contiguous_coords = large_coords[:, :3]  # Non-contiguous view
         radii = np.array([1.0, 1.0], dtype=np.float64)
 

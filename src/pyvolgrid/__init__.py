@@ -1,7 +1,8 @@
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
 
 import numpy as np
 from numpy.typing import ArrayLike
+
 from pyvolgrid._core import _volume_from_spheres_float32, _volume_from_spheres_float64
 
 try:

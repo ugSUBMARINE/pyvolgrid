@@ -1,6 +1,7 @@
 """Tests for volume calculation functionality in PyVolGrid."""
 
 import math
+
 import numpy as np
 
 from pyvolgrid import volume_from_spheres
@@ -23,9 +24,7 @@ class TestVolumeCalculation:
 
         # Allow for some error due to grid approximation (within 10%)
         relative_error = abs(calculated_volume - analytical_volume) / analytical_volume
-        assert relative_error < 0.1, (
-            f"Relative error {relative_error:.3f} too large for single sphere"
-        )
+        assert relative_error < 0.1, f"Relative error {relative_error:.3f} too large for single sphere"
         assert calculated_volume > 0
 
     def test_single_sphere_different_radii(self):
@@ -37,17 +36,11 @@ class TestVolumeCalculation:
             coords = np.array([[0.0, 0.0, 0.0]])
             radii = np.array([radius])
 
-            calculated_volume = volume_from_spheres(
-                coords, radii, grid_spacing=grid_spacing
-            )
+            calculated_volume = volume_from_spheres(coords, radii, grid_spacing=grid_spacing)
             analytical_volume = (4.0 / 3.0) * math.pi * (radius**3)
 
-            relative_error = (
-                abs(calculated_volume - analytical_volume) / analytical_volume
-            )
-            assert relative_error < 0.15, (
-                f"Error too large for radius {radius}: {relative_error:.3f}"
-            )
+            relative_error = abs(calculated_volume - analytical_volume) / analytical_volume
+            assert relative_error < 0.15, f"Error too large for radius {radius}: {relative_error:.3f}"
 
     def test_non_overlapping_spheres(self):
         """Test that non-overlapping spheres have additive volume."""
@@ -65,9 +58,7 @@ class TestVolumeCalculation:
         # For non-overlapping spheres, combined should equal sum of individuals
         expected_volume = vol1 + vol2
         relative_error = abs(combined_volume - expected_volume) / expected_volume
-        assert relative_error < 0.05, (
-            f"Non-overlapping spheres error: {relative_error:.3f}"
-        )
+        assert relative_error < 0.05, f"Non-overlapping spheres error: {relative_error:.3f}"
 
     def test_completely_overlapping_spheres(self):
         """Test that completely overlapping spheres have volume of the larger sphere."""
@@ -78,16 +69,10 @@ class TestVolumeCalculation:
         combined_volume = volume_from_spheres(coords, radii, grid_spacing=0.08)
 
         # Volume should be approximately that of the larger sphere
-        large_sphere_volume = volume_from_spheres(
-            coords[:1], radii[:1], grid_spacing=0.08
-        )
+        large_sphere_volume = volume_from_spheres(coords[:1], radii[:1], grid_spacing=0.08)
 
-        relative_error = (
-            abs(combined_volume - large_sphere_volume) / large_sphere_volume
-        )
-        assert relative_error < 0.1, (
-            f"Completely overlapping spheres error: {relative_error:.3f}"
-        )
+        relative_error = abs(combined_volume - large_sphere_volume) / large_sphere_volume
+        assert relative_error < 0.1, f"Completely overlapping spheres error: {relative_error:.3f}"
 
     def test_partially_overlapping_spheres(self):
         """Test partially overlapping spheres."""
@@ -108,9 +93,7 @@ class TestVolumeCalculation:
         # Should be less than sum due to overlap
         sum_individual = 2 * single_volume
         overlap_reduction = (sum_individual - combined_volume) / sum_individual
-        assert overlap_reduction > 0.01, (
-            f"Expected some overlap reduction, got {overlap_reduction:.4f}"
-        )
+        assert overlap_reduction > 0.01, f"Expected some overlap reduction, got {overlap_reduction:.4f}"
 
     def test_touching_spheres(self):
         """Test spheres that just touch each other."""
@@ -151,9 +134,7 @@ class TestVolumeCalculation:
         assert all(v > 0 for v in volumes), "All volumes should be positive"
 
         # The finest grid spacing should give reasonable accuracy
-        assert errors[-1] < 0.15, (
-            f"Finest grid spacing error too large: {errors[-1]:.3f}"
-        )
+        assert errors[-1] < 0.15, f"Finest grid spacing error too large: {errors[-1]:.3f}"
 
     def test_zero_radius_sphere(self):
         """Test sphere with zero radius."""
@@ -166,9 +147,7 @@ class TestVolumeCalculation:
     def test_multiple_spheres_different_sizes(self):
         """Test multiple spheres with different sizes."""
         # Mix of different sized spheres in different positions
-        coords = np.array(
-            [[0.0, 0.0, 0.0], [5.0, 0.0, 0.0], [0.0, 5.0, 0.0], [5.0, 5.0, 0.0]]
-        )
+        coords = np.array([[0.0, 0.0, 0.0], [5.0, 0.0, 0.0], [0.0, 5.0, 0.0], [5.0, 5.0, 0.0]])
         radii = np.array([1.0, 0.5, 1.5, 0.8])
 
         combined_volume = volume_from_spheres(coords, radii, grid_spacing=0.1)
@@ -191,16 +170,12 @@ class TestVolumeCalculation:
         # Compare with individual volumes (they're far apart, should be additive)
         individual_volumes = []
         for i in range(len(coords)):
-            vol = volume_from_spheres(
-                coords[i : i + 1], radii[i : i + 1], grid_spacing=0.1
-            )
+            vol = volume_from_spheres(coords[i : i + 1], radii[i : i + 1], grid_spacing=0.1)
             individual_volumes.append(vol)
 
         expected_sum = sum(individual_volumes)
         relative_error = abs(volume - expected_sum) / expected_sum
-        assert relative_error < 0.1, (
-            f"3D positioned spheres error: {relative_error:.3f}"
-        )
+        assert relative_error < 0.1, f"3D positioned spheres error: {relative_error:.3f}"
 
     def test_deterministic_results(self):
         """Test that the same input gives the same output."""

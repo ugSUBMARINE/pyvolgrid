@@ -1,6 +1,7 @@
 """Common test fixtures and utilities for PyVolGrid tests."""
 
 import math
+
 import numpy as np
 import pytest
 
@@ -57,9 +58,7 @@ def assert_relative_error(actual, expected, max_error=0.1, message=""):
         )
 
 
-def create_random_spheres(
-    n_spheres, seed=42, coord_range=(-2, 2), radius_range=(0.1, 1.0)
-):
+def create_random_spheres(n_spheres, seed=42, coord_range=(-2, 2), radius_range=(0.1, 1.0)):
     """Helper function to create random spheres for testing."""
     np.random.seed(seed)
     coords = np.random.uniform(coord_range[0], coord_range[1], size=(n_spheres, 3))
