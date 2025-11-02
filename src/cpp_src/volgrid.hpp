@@ -3,30 +3,30 @@
 
 #include <cstddef>
 
-// Define a struct to hold 3D coordinates
-struct TRd {
-    double x, y, z;
+// Define a templated struct to hold 3D coordinates of any numeric type
+template<typename T>
+struct TR {
+    T x, y, z;
 };
 
-// Define a struct to hold 3D integer coordinates or indexes
-struct TRi {
-    int x, y, z;
-};
-
-// Function declarations
+// Templated function declarations
 // Calculate the volume occupied by spheres using a grid-based approach
-double volume_of_spheres(const double* coords, const double* radii, size_t& n_spheres, double& grid_spacing);
+template<typename T>
+T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, const T grid_spacing);
 
-// Get the maximum value from an array of doubles
-double get_max(const double* array, size_t& n);
+// Get the maximum value from an array
+template<typename T>
+T get_max(const T* array, const size_t n);
 
 // Calculate grid parameters: extent and origin
+template<typename T>
 void get_grid_params(
-    const double* coords, const size_t& n, const double& cushion, const double& grid_spacing,
-    TRi& extent, TRd& origin
+    const T* coords, const size_t& n, const T& cushion, const T& grid_spacing,
+    TR<int>& extent, TR<T>& origin
 );
 
 // Get the extent (min and max coordinates) from a list of 3D coordinates
-void get_extent(const double* coords, const size_t& n_coords, TRd& min_coords, TRd& max_coords);
+template<typename T>
+void get_extent(const T* coords, const size_t& n_coords, TR<T>& min_coords, TR<T>& max_coords);
 
 #endif

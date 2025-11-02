@@ -6,12 +6,13 @@
 #include <cmath>
 #include <algorithm>
 
-double volume_of_spheres(const double* coords, const double* radii, size_t& n_spheres, double& grid_spacing)
+template<typename T>
+T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, const T grid_spacing)
 {
     // calculate origin and extent of the grid
-    TRi extent;
-    TRd origin;
-    double cushion = grid_spacing + get_max(radii, n_spheres);
+    TR<int> extent;
+    TR<T> origin;
+    T cushion = grid_spacing + get_max(radii, n_spheres);
     get_grid_params(coords, n_spheres, cushion, grid_spacing, extent, origin);
 
     // allocate memory for the grid and initialize with zeroes
@@ -30,15 +31,15 @@ double volume_of_spheres(const double* coords, const double* radii, size_t& n_sp
     int points_in_spheres = 0;
     for (size_t i = 0; i < n_spheres; ++i) {
         // radius in grid units
-        double radius = radii[i] / grid_spacing;
-        double radius_squared = radius * radius;
+        T radius = radii[i] / grid_spacing;
+        T radius_squared = radius * radius;
 
         // center of the sphere in grid units
         // assuming coords is a flat array [x1, y1, z1, x2, y2, z2, ...]
         size_t c_index = 3 * i;
-        double cx = (coords[c_index] - origin.x) / grid_spacing;
-        double cy = (coords[c_index + 1] - origin.y) / grid_spacing;
-        double cz = (coords[c_index + 2] - origin.z) / grid_spacing;
+        T cx = (coords[c_index] - origin.x) / grid_spacing;
+        T cy = (coords[c_index + 1] - origin.y) / grid_spacing;
+        T cz = (coords[c_index + 2] - origin.z) / grid_spacing;
 
         // determine the bounding box of the sphere in grid coordinates
         size_t x_min = std::max(static_cast<int>(std::floor(cx - radius)), 0);
@@ -59,9 +60,9 @@ double volume_of_spheres(const double* coords, const double* radii, size_t& n_sp
                     if (grid[index] == 1) continue;
 
                     // check if the point is inside the sphere
-                    double dx = (x - cx);
-                    double dy = (y - cy);
-                    double dz = (z - cz);
+                    T dx = (static_cast<T>(x) - cx);
+                    T dy = (static_cast<T>(y) - cy);
+                    T dz = (static_cast<T>(z) - cz);
                     if ((dx * dx + dy * dy + dz * dz) <= radius_squared) {
                         grid[index] = 1;
                         points_in_spheres++;
@@ -72,7 +73,7 @@ double volume_of_spheres(const double* coords, const double* radii, size_t& n_sp
     }
 
     // calculate the total volume
-    double total_volume = points_in_spheres * (grid_spacing * grid_spacing * grid_spacing);
+    T total_volume = static_cast<T>(points_in_spheres) * (grid_spacing * grid_spacing * grid_spacing);
 
     // release grid memory at the end of the function
     delete[] grid;
@@ -80,13 +81,14 @@ double volume_of_spheres(const double* coords, const double* radii, size_t& n_sp
     return total_volume;
 }
 
-double get_max(const double* array, size_t& n)
+template<typename T>
+T get_max(const T* array, const size_t n)
 {
     if (n == 0) {
         throw std::invalid_argument("Cannot find the maximum of an empty array.");
     }
 
-    double max_val = -std::numeric_limits<double>::infinity();
+    T max_val = -std::numeric_limits<T>::infinity();
     for (size_t i = 0; i < n; ++i) {
         // assume array is a flat array
         if (array[i] > max_val) {
@@ -96,42 +98,44 @@ double get_max(const double* array, size_t& n)
     return max_val;
 }
 
+template<typename T>
 void get_grid_params(
-    const double* coords, const size_t& n_coords, const double& cushion, const double& grid_spacing,
-    TRi& extent, TRd& origin
+    const T* coords, const size_t& n_coords, const T& cushion, const T& grid_spacing,
+    TR<int>& extent, TR<T>& origin
 )
 {
     // extent of coordinates in cartesian
-    TRd min_coords, max_coords;
+    TR<T> min_coords, max_coords;
     get_extent(coords, n_coords, min_coords, max_coords);
 
      // calculate extent in grid units
-    int a_min = static_cast<int>(floor((min_coords.x - cushion) / grid_spacing));
-    int a_max = static_cast<int>(ceil((max_coords.x + cushion) / grid_spacing));
-    int b_min = static_cast<int>(floor((min_coords.y - cushion) / grid_spacing));
-    int b_max = static_cast<int>(ceil((max_coords.y + cushion) / grid_spacing));
-    int c_min = static_cast<int>(floor((min_coords.z - cushion) / grid_spacing));
-    int c_max = static_cast<int>(ceil((max_coords.z + cushion) / grid_spacing));
+    int a_min = static_cast<int>(std::floor((min_coords.x - cushion) / grid_spacing));
+    int a_max = static_cast<int>(std::ceil((max_coords.x + cushion) / grid_spacing));
+    int b_min = static_cast<int>(std::floor((min_coords.y - cushion) / grid_spacing));
+    int b_max = static_cast<int>(std::ceil((max_coords.y + cushion) / grid_spacing));
+    int c_min = static_cast<int>(std::floor((min_coords.z - cushion) / grid_spacing));
+    int c_max = static_cast<int>(std::ceil((max_coords.z + cushion) / grid_spacing));
 
     // number of grid points and origin of the grid
     extent = {a_max - a_min + 1, b_max - b_min + 1, c_max - c_min + 1};
     origin = {a_min * grid_spacing, b_min * grid_spacing, c_min * grid_spacing};
 }
 
-void get_extent(const double* coords, const size_t& n_coords, TRd& min_coords, TRd& max_coords)
+template<typename T>
+void get_extent(const T* coords, const size_t& n_coords, TR<T>& min_coords, TR<T>& max_coords)
 {
     if (n_coords == 0) {
         throw std::invalid_argument("Cannot determine min/max of an empty array.");
     }
 
-    min_coords.x = min_coords.y = min_coords.z = std::numeric_limits<double>::infinity();
-    max_coords.x = max_coords.y = max_coords.z = -std::numeric_limits<double>::infinity();
+    min_coords.x = min_coords.y = min_coords.z = std::numeric_limits<T>::infinity();
+    max_coords.x = max_coords.y = max_coords.z = -std::numeric_limits<T>::infinity();
 
     for (size_t i = 0; i < n_coords; ++i) {
         // assume coords is a flat array [x1, y1, z1, x2, y2, z2, ...]
-        double x = coords[3 * i];
-        double y = coords[3 * i + 1];
-        double z = coords[3 * i + 2];
+        T x = coords[3 * i];
+        T y = coords[3 * i + 1];
+        T z = coords[3 * i + 2];
 
         if (x < min_coords.x) min_coords.x = x;
         if (y < min_coords.y) min_coords.y = y;
@@ -142,3 +146,22 @@ void get_extent(const double* coords, const size_t& n_coords, TRd& min_coords, T
         if (z > max_coords.z) max_coords.z = z;
     }
 }
+
+// Explicit template instantiations for int, float and double
+template struct TR<int>;
+template struct TR<float>;
+template struct TR<double>;
+
+template float get_max<float>(const float*, const size_t);
+template double get_max<double>(const double*, const size_t);
+
+template void get_extent<float>(const float*, const size_t&, TR<float>&, TR<float>&);
+template void get_extent<double>(const double*, const size_t&, TR<double>&, TR<double>&);
+
+template void get_grid_params<float>(const float*, const size_t&,
+                                      const float&, const float&, TR<int>&, TR<float>&);
+template void get_grid_params<double>(const double*, const size_t&,
+                                       const double&, const double&, TR<int>&, TR<double>&);
+
+template float volume_of_spheres<float>(const float*, const float*, const size_t, const float);
+template double volume_of_spheres<double>(const double*, const double*, const size_t, const double);

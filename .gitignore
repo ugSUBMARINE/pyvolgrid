@@ -15,3 +15,7 @@ htmlcov/
 
 # MacOS specific files
 .DS_Store
+
+# Agent-related files
+AGENTS.md
+WARP.md
