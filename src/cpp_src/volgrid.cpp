@@ -5,6 +5,7 @@
 #include <limits>
 #include <cmath>
 #include <algorithm>
+#include <memory>
 
 template<typename T>
 T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, const T grid_spacing)
@@ -16,12 +17,15 @@ T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, con
     get_grid_params(coords, n_spheres, cushion, grid_spacing, extent, origin);
 
     // allocate memory for the grid and initialize with zeroes
-    int8_t* grid = nullptr;
-    size_t n_points = 0;
+    size_t n_points = static_cast<size_t>(extent.x * extent.y * extent.z);
+    if (n_points == 0) {
+        return 0.0;
+    }
+    
+    std::unique_ptr<int8_t[]> grid;
     try {
-        n_points = static_cast<size_t>(extent.x * extent.y * extent.z);
-        grid = new int8_t[n_points];
-        std::fill(grid, grid + n_points, 0);
+        grid = std::make_unique<int8_t[]>(n_points);
+        std::fill(grid.get(), grid.get() + n_points, 0);
     }
     catch (const std::bad_alloc&) {
         throw std::runtime_error("Memory allocation failed for the grid.");
@@ -74,9 +78,6 @@ T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, con
 
     // calculate the total volume
     T total_volume = static_cast<T>(points_in_spheres) * (grid_spacing * grid_spacing * grid_spacing);
-
-    // release grid memory at the end of the function
-    delete[] grid;
 
     return total_volume;
 }
