@@ -51,22 +51,21 @@ def volume_from_spheres(
     if coords_arr.shape[0] == 0:
         raise ValueError("coords must contain at least one coordinate")
 
-    # Determine target dtype based on input dtypes
-    # If coords is float32 and radii is either float32 or scalar, use float32 path
-    # Otherwise use float64 path
-    use_float32 = coords_arr.dtype == np.float32
-
-    if not radii_is_scalar:
+    # Determine target dtype using numpy.result_type for robustness
+    if radii_is_scalar:
+        result_type = np.result_type(coords_arr.dtype, radii)
+        radii_arr = None
+    else:
         radii_arr = np.asarray(radii)
-        # Only use float32 if both coords and radii are float32
-        if use_float32 and radii_arr.dtype != np.float32:
-            use_float32 = False
+        result_type = np.result_type(coords_arr.dtype, radii_arr.dtype)
+
+    # Use float32 if the result can be safely cast, otherwise default to float64
+    DTYPE = np.float32 if np.can_cast(result_type, np.float32, casting="safe") else np.float64
 
     # Validate grid spacing
     if grid_spacing <= 0.0:
         raise ValueError("grid_spacing must be greater than 0.0")
 
-    DTYPE = np.float32 if use_float32 else np.float64
     coords_array = np.ascontiguousarray(coords_arr, dtype=DTYPE)
 
     if radii_is_scalar:
@@ -82,14 +81,14 @@ def volume_from_spheres(
             f"Number of radii ({radii_array.shape[0]}) must match number of coordinates ({coords_array.shape[0]})"
         )
 
-    if use_float32:
+    if DTYPE == np.float32:
         coords_f32 = cast(NDArray[np.float32], coords_array)
         radii_f32 = cast(NDArray[np.float32], radii_array)
         return _volume_from_spheres_float32(coords_f32, radii_f32, grid_spacing)
-
-    coords_f64 = cast(NDArray[np.float64], coords_array)
-    radii_f64 = cast(NDArray[np.float64], radii_array)
-    return _volume_from_spheres_float64(coords_f64, radii_f64, grid_spacing)
+    else:
+        coords_f64 = cast(NDArray[np.float64], coords_array)
+        radii_f64 = cast(NDArray[np.float64], radii_array)
+        return _volume_from_spheres_float64(coords_f64, radii_f64, grid_spacing)
 
 
 __all__ = ["volume_from_spheres"]
