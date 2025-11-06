@@ -22,7 +22,7 @@ T get_max(const T* array, const size_t n);
 template<typename T>
 void get_grid_params(
     const T* coords, const size_t& n, const T& cushion, const T& grid_spacing,
-    TR<int>& extent, TR<T>& origin
+    TR<size_t>& extent, TR<T>& origin
 );
 
 // Get the extent (min and max coordinates) from a list of 3D coordinates

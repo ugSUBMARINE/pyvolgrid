@@ -11,17 +11,17 @@ template<typename T>
 T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, const T grid_spacing)
 {
     // calculate origin and extent of the grid
-    TR<int> extent;
+    TR<size_t> extent;
     TR<T> origin;
     T cushion = grid_spacing + get_max(radii, n_spheres);
     get_grid_params(coords, n_spheres, cushion, grid_spacing, extent, origin);
 
     // allocate memory for the grid and initialize with zeroes
-    size_t n_points = static_cast<size_t>(extent.x * extent.y * extent.z);
+    size_t n_points = extent.x * extent.y * extent.z;
     if (n_points == 0) {
         return 0.0;
     }
-    
+
     std::unique_ptr<int8_t[]> grid;
     try {
         grid = std::make_unique<int8_t[]>(n_points);
@@ -32,7 +32,7 @@ T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, con
     }
 
     // loop over all spheres and mark the grid points inside the spheres
-    int points_in_spheres = 0;
+    size_t points_in_spheres = 0;
     for (size_t i = 0; i < n_spheres; ++i) {
         // radius in grid units
         T radius = radii[i] / grid_spacing;
@@ -46,12 +46,12 @@ T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, con
         T cz = (coords[c_index + 2] - origin.z) / grid_spacing;
 
         // determine the bounding box of the sphere in grid coordinates
-        size_t x_min = std::max(static_cast<int>(std::floor(cx - radius)), 0);
-        size_t x_max = std::min(static_cast<int>(std::ceil(cx + radius)), extent.x);
-        size_t y_min = std::max(static_cast<int>(std::floor(cy - radius)), 0);
-        size_t y_max = std::min(static_cast<int>(std::ceil(cy + radius)), extent.y);
-        size_t z_min = std::max(static_cast<int>(std::floor(cz - radius)), 0);
-        size_t z_max = std::min(static_cast<int>(std::ceil(cz + radius)), extent.z);
+        size_t x_min = static_cast<size_t>(std::max(T(0.0), std::floor(cx - radius)));
+        size_t x_max = static_cast<size_t>(std::min(static_cast<T>(extent.x), std::ceil(cx + radius)));
+        size_t y_min = static_cast<size_t>(std::max(T(0.0), std::floor(cy - radius)));
+        size_t y_max = static_cast<size_t>(std::min(static_cast<T>(extent.y), std::ceil(cy + radius)));
+        size_t z_min = static_cast<size_t>(std::max(T(0.0), std::floor(cz - radius)));
+        size_t z_max = static_cast<size_t>(std::min(static_cast<T>(extent.z), std::ceil(cz + radius)));
 
         // iterate over the bounding box and mark points inside the sphere
         for (size_t x = x_min; x < x_max; ++x) {
@@ -77,7 +77,8 @@ T volume_of_spheres(const T* coords, const T* radii, const size_t n_spheres, con
     }
 
     // calculate the total volume
-    T total_volume = static_cast<T>(points_in_spheres) * (grid_spacing * grid_spacing * grid_spacing);
+    T volume_per_point = grid_spacing * grid_spacing * grid_spacing;
+    T total_volume = static_cast<T>(points_in_spheres) * volume_per_point;
 
     return total_volume;
 }
@@ -102,7 +103,7 @@ T get_max(const T* array, const size_t n)
 template<typename T>
 void get_grid_params(
     const T* coords, const size_t& n_coords, const T& cushion, const T& grid_spacing,
-    TR<int>& extent, TR<T>& origin
+    TR<size_t>& extent, TR<T>& origin
 )
 {
     // extent of coordinates in cartesian
@@ -110,15 +111,19 @@ void get_grid_params(
     get_extent(coords, n_coords, min_coords, max_coords);
 
      // calculate extent in grid units
-    int a_min = static_cast<int>(std::floor((min_coords.x - cushion) / grid_spacing));
-    int a_max = static_cast<int>(std::ceil((max_coords.x + cushion) / grid_spacing));
-    int b_min = static_cast<int>(std::floor((min_coords.y - cushion) / grid_spacing));
-    int b_max = static_cast<int>(std::ceil((max_coords.y + cushion) / grid_spacing));
-    int c_min = static_cast<int>(std::floor((min_coords.z - cushion) / grid_spacing));
-    int c_max = static_cast<int>(std::ceil((max_coords.z + cushion) / grid_spacing));
+    long a_min = static_cast<long>(std::floor((min_coords.x - cushion) / grid_spacing));
+    long a_max = static_cast<long>(std::ceil((max_coords.x + cushion) / grid_spacing));
+    long b_min = static_cast<long>(std::floor((min_coords.y - cushion) / grid_spacing));
+    long b_max = static_cast<long>(std::ceil((max_coords.y + cushion) / grid_spacing));
+    long c_min = static_cast<long>(std::floor((min_coords.z - cushion) / grid_spacing));
+    long c_max = static_cast<long>(std::ceil((max_coords.z + cushion) / grid_spacing));
 
     // number of grid points and origin of the grid
-    extent = {a_max - a_min + 1, b_max - b_min + 1, c_max - c_min + 1};
+    extent = {
+        static_cast<size_t>(a_max - a_min + 1),
+        static_cast<size_t>(b_max - b_min + 1),
+        static_cast<size_t>(c_max - c_min + 1)
+    };
     origin = {a_min * grid_spacing, b_min * grid_spacing, c_min * grid_spacing};
 }
 
@@ -149,7 +154,7 @@ void get_extent(const T* coords, const size_t& n_coords, TR<T>& min_coords, TR<T
 }
 
 // Explicit template instantiations for int, float and double
-template struct TR<int>;
+template struct TR<size_t>;
 template struct TR<float>;
 template struct TR<double>;
 
@@ -160,9 +165,9 @@ template void get_extent<float>(const float*, const size_t&, TR<float>&, TR<floa
 template void get_extent<double>(const double*, const size_t&, TR<double>&, TR<double>&);
 
 template void get_grid_params<float>(const float*, const size_t&,
-                                      const float&, const float&, TR<int>&, TR<float>&);
+                                      const float&, const float&, TR<size_t>&, TR<float>&);
 template void get_grid_params<double>(const double*, const size_t&,
-                                       const double&, const double&, TR<int>&, TR<double>&);
+                                       const double&, const double&, TR<size_t>&, TR<double>&);
 
 template float volume_of_spheres<float>(const float*, const float*, const size_t, const float);
 template double volume_of_spheres<double>(const double*, const double*, const size_t, const double);
